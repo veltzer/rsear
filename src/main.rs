@@ -13,6 +13,7 @@ fn main() {
     let settings = Settings::new().unwrap();
     let synth = Synth::new(settings).unwrap();
     synth.sfload(SOUNDFONT_PATH, true).unwrap();
+    synth.set_gain(2.0);
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
