@@ -21,6 +21,11 @@ fn render_chunks(synth: &Synth, sink: &Sink, count: usize) {
         let mut buf = vec![0f32; size];
         synth.write(buf.as_mut_slice()).unwrap();
         sink.append(SamplesBuffer::new(CHANNELS, SAMPLE_RATE, buf));
+        // Pace rendering with playback so note state changes stay in sync with audio
+        // Keep a larger buffer to avoid underruns/hiccups
+        while sink.len() > 10 {
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
     }
 }
 

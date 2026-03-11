@@ -74,9 +74,12 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         ui.allocate_painter(egui::vec2(available_width, staff_height), egui::Sense::hover());
     let rect = response.rect;
 
+    // White background for the staff area
+    painter.rect_filled(rect, 4.0, egui::Color32::WHITE);
+
     let line_color = egui::Color32::from_rgb(60, 60, 60);
-    let note_color = egui::Color32::from_rgb(40, 40, 40);
-    let sharp_color = egui::Color32::from_rgb(40, 40, 40);
+    let note_color = egui::Color32::from_rgb(40, 40, 200);
+    let sharp_color = line_color;
 
     // Staff parameters
     let line_spacing = 10.0_f32;
