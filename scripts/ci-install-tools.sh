@@ -16,3 +16,8 @@ set -euo pipefail
 # Retries=3 lets apt fall through to archive.ubuntu.com.
 sudo apt-get -o Acquire::Retries=3 update
 sudo apt-get -o Acquire::Retries=3 install -y libasound2-dev
+
+# The tests synthesize audio through fluidsynth against the FluidR3 General
+# MIDI soundfont at its packaged path (/usr/share/sounds/sf2/FluidR3_GM.sf2,
+# the SOUNDFONT_PATH constant in src/audio.rs and tests/basic.rs).
+sudo apt-get -o Acquire::Retries=3 install -y fluid-soundfont-gm
