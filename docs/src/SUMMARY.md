@@ -5,3 +5,4 @@
 - [Getting Started](getting-started.md)
 - [Architecture](architecture.md)
 - [Testing](testing.md)
+- [Release Info](release-info.md)

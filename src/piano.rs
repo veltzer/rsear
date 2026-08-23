@@ -107,7 +107,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         let y = y_for_pos(pos);
         painter.line_segment(
             [egui::pos2(staff_left, y), egui::pos2(staff_right, y)],
-            egui::Stroke::new(1.0, line_color),
+            egui::Stroke::new(1.0_f32, line_color),
         );
     }
 
@@ -124,7 +124,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         let y = y_for_pos(pos);
         painter.line_segment(
             [egui::pos2(staff_left, y), egui::pos2(staff_right, y)],
-            egui::Stroke::new(1.0, line_color),
+            egui::Stroke::new(1.0_f32, line_color),
         );
     }
 
@@ -165,7 +165,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         if pos == 0 {
             painter.line_segment(
                 [egui::pos2(x - note_radius - 4.0, y), egui::pos2(x + note_radius + 4.0, y)],
-                egui::Stroke::new(1.0, line_color),
+                egui::Stroke::new(1.0_f32, line_color),
             );
         }
         // Ledger lines below bass staff (pos < -10)
@@ -175,7 +175,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
                 let ly = y_for_pos(lp);
                 painter.line_segment(
                     [egui::pos2(x - note_radius - 4.0, ly), egui::pos2(x + note_radius + 4.0, ly)],
-                    egui::Stroke::new(1.0, line_color),
+                    egui::Stroke::new(1.0_f32, line_color),
                 );
                 lp -= 2;
             }
@@ -187,7 +187,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
                 let ly = y_for_pos(lp);
                 painter.line_segment(
                     [egui::pos2(x - note_radius - 4.0, ly), egui::pos2(x + note_radius + 4.0, ly)],
-                    egui::Stroke::new(1.0, line_color),
+                    egui::Stroke::new(1.0_f32, line_color),
                 );
                 lp += 2;
             }
@@ -241,7 +241,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             white_color
         };
         painter.rect_filled(key_rect, 2.0, fill);
-        painter.rect_stroke(key_rect, 2.0, egui::Stroke::new(1.0, outline), egui::StrokeKind::Outside);
+        painter.rect_stroke(key_rect, 2.0, egui::Stroke::new(1.0_f32, outline), egui::StrokeKind::Outside);
 
         // Draw note name on the key
         let name = note_name(note);
