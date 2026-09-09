@@ -3073,7 +3073,7 @@ dependencies = [
 
 [[package]]
 name = "rsear"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "eframe",
  "fluidlite",
