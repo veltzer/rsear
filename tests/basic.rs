@@ -1,6 +1,6 @@
 use fluidlite::{Settings, Synth};
-use rodio::buffer::SamplesBuffer;
 use rodio::Source;
+use rodio::buffer::SamplesBuffer;
 
 const SOUNDFONT_PATH: &str = "/usr/share/sounds/sf2/FluidR3_GM.sf2";
 const SAMPLE_RATE: u32 = 44100;
@@ -78,7 +78,10 @@ fn test_different_notes_produce_different_audio() {
     synth.write(buf_a.as_mut_slice()).unwrap();
     synth.note_off(0, 69).unwrap();
 
-    assert_ne!(buf_c, buf_a, "Different notes should produce different audio");
+    assert_ne!(
+        buf_c, buf_a,
+        "Different notes should produce different audio"
+    );
 }
 
 #[test]

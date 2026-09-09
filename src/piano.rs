@@ -46,18 +46,18 @@ fn midi_to_staff_position(note: u8) -> i32 {
     let octave = (note as i32 / 12) - 5; // octave relative to C4's octave
     let pitch_class = note % 12;
     let step = match pitch_class {
-        0 => 0,        // C
-        1 => 0,        // C#
-        2 => 1,        // D
-        3 => 1,        // D#
-        4 => 2,        // E
-        5 => 3,        // F
-        6 => 3,        // F#
-        7 => 4,        // G
-        8 => 4,        // G#
-        9 => 5,        // A
-        10 => 5,       // A#
-        11 => 6,       // B
+        0 => 0,  // C
+        1 => 0,  // C#
+        2 => 1,  // D
+        3 => 1,  // D#
+        4 => 2,  // E
+        5 => 3,  // F
+        6 => 3,  // F#
+        7 => 4,  // G
+        8 => 4,  // G#
+        9 => 5,  // A
+        10 => 5, // A#
+        11 => 6, // B
         _ => 0,
     };
     octave * 7 + step
@@ -70,8 +70,10 @@ fn needs_sharp(note: u8) -> bool {
 fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     let available_width = ui.available_width();
     let staff_height = 160.0;
-    let (response, painter) =
-        ui.allocate_painter(egui::vec2(available_width, staff_height), egui::Sense::hover());
+    let (response, painter) = ui.allocate_painter(
+        egui::vec2(available_width, staff_height),
+        egui::Sense::hover(),
+    );
     let rect = response.rect;
 
     // White background for the staff area
@@ -164,7 +166,10 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         // Middle C (pos 0) needs a ledger line
         if pos == 0 {
             painter.line_segment(
-                [egui::pos2(x - note_radius - 4.0, y), egui::pos2(x + note_radius + 4.0, y)],
+                [
+                    egui::pos2(x - note_radius - 4.0, y),
+                    egui::pos2(x + note_radius + 4.0, y),
+                ],
                 egui::Stroke::new(1.0_f32, line_color),
             );
         }
@@ -174,7 +179,10 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             while lp >= pos {
                 let ly = y_for_pos(lp);
                 painter.line_segment(
-                    [egui::pos2(x - note_radius - 4.0, ly), egui::pos2(x + note_radius + 4.0, ly)],
+                    [
+                        egui::pos2(x - note_radius - 4.0, ly),
+                        egui::pos2(x + note_radius + 4.0, ly),
+                    ],
                     egui::Stroke::new(1.0_f32, line_color),
                 );
                 lp -= 2;
@@ -186,7 +194,10 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             while lp <= pos {
                 let ly = y_for_pos(lp);
                 painter.line_segment(
-                    [egui::pos2(x - note_radius - 4.0, ly), egui::pos2(x + note_radius + 4.0, ly)],
+                    [
+                        egui::pos2(x - note_radius - 4.0, ly),
+                        egui::pos2(x + note_radius + 4.0, ly),
+                    ],
                     egui::Stroke::new(1.0_f32, line_color),
                 );
                 lp += 2;
@@ -234,14 +245,20 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             continue;
         }
         let x = rect.left() + wi as f32 * white_w;
-        let key_rect = egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(white_w, white_h));
+        let key_rect =
+            egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(white_w, white_h));
         let fill = if active_notes.contains(&note) {
             active_white
         } else {
             white_color
         };
         painter.rect_filled(key_rect, 2.0, fill);
-        painter.rect_stroke(key_rect, 2.0, egui::Stroke::new(1.0_f32, outline), egui::StrokeKind::Outside);
+        painter.rect_stroke(
+            key_rect,
+            2.0,
+            egui::Stroke::new(1.0_f32, outline),
+            egui::StrokeKind::Outside,
+        );
 
         // Draw note name on the key
         let name = note_name(note);
@@ -288,13 +305,13 @@ fn note_name(note: u8) -> &'static str {
 }
 
 impl eframe::App for PianoApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let (active, finished) = {
             let s = self.note_state.lock().unwrap();
             (s.active_notes.clone(), s.finished)
         };
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("Piano Visualizer");
             ui.add_space(8.0);
 
@@ -321,7 +338,7 @@ impl eframe::App for PianoApp {
 
         // Continuously repaint while audio is playing
         if !finished {
-            ctx.request_repaint();
+            ui.ctx().request_repaint();
         }
     }
 }

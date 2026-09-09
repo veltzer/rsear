@@ -10,7 +10,7 @@ repository = "https://github.com/veltzer/rsear"
 [dependencies]
 fluidlite = "0.2"
 rodio = "0.19"
-eframe = "0.31"
+eframe = "0.36"
 
 [profile.release]
 strip = true
