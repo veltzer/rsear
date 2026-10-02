@@ -9,7 +9,7 @@ repository = "https://github.com/veltzer/rsear"
 
 [dependencies]
 fluidlite = "0.2"
-rodio = "0.19"
+rodio = "0.22"
 eframe = "0.36"
 
 # fluidlite-sys ships prebuilt bindings for every target the release job
