@@ -2,7 +2,7 @@
 
 ## Module Structure
 
-```
+```text
 src/
 ├── main.rs    — entry point, spawns audio thread and launches GUI
 ├── audio.rs   — audio synthesis and playback using fluidlite + rodio
