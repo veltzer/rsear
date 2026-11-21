@@ -4,7 +4,7 @@ Findings from a code scan on 2026-10-04.
 
 ## High
 
-- `src/audio.rs:9` - the SoundFont path is hardcoded to the Debian location `/usr/share/sounds/sf2/FluidR3_GM.sf2` and loaded with `.unwrap()` at `src/audio.rs:56`, yet release binaries are built for macOS too (`Cargo.toml:15-25`); on any system without that exact file the audio thread panics. Make the path configurable (CLI flag / env var), search a few known locations, and report a clear error instead of panicking.
+- `src/audio.rs:9` - the SoundFont path is hardcoded to the Debian location `/usr/share/sounds/sf2/FluidR3_GM.sf2` and loaded with `.unwrap()` at `src/audio.rs:56`; on any system without that exact file (a non-Debian distro, or Debian without fluid-soundfont-gm) the audio thread panics. Make the path configurable (CLI flag / env var), search a few known locations, and report a clear error instead of panicking.
 
 ## Medium
 
