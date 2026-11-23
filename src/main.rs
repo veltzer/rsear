@@ -11,7 +11,7 @@ fn main() -> eframe::Result<()> {
     std::thread::spawn(move || {
         // Small delay so the GUI window appears first
         std::thread::sleep(std::time::Duration::from_millis(500));
-        audio::play_sequence(audio_state);
+        audio::play_sequence(&audio_state);
     });
 
     let options = eframe::NativeOptions {

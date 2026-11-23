@@ -28,7 +28,7 @@ fn white_key_count(low: u8, high: u8) -> usize {
     (low..=high).filter(|n| !is_black_key(*n)).count()
 }
 
-/// Map a white-key MIDI note to its index among white keys starting from LOW_NOTE
+/// Map a white-key MIDI note to its index among white keys starting from `LOW_NOTE`
 fn white_key_index(note: u8) -> usize {
     (LOW_NOTE..note).filter(|n| !is_black_key(*n)).count()
 }
@@ -43,28 +43,59 @@ fn black_key_left_white(note: u8) -> usize {
 /// Returns the number of staff steps from middle C (C4=60).
 /// C=0, D=1, E=2, F=3, G=4, A=5, B=6, then +7 per octave.
 fn midi_to_staff_position(note: u8) -> i32 {
-    let octave = (note as i32 / 12) - 5; // octave relative to C4's octave
+    // C, C#, D, D#, E, F, F#, G, G#, A, A#, B
+    const STEPS: [i32; 12] = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
+    let octave = (i32::from(note) / 12) - 5; // octave relative to C4's octave
     let pitch_class = note % 12;
-    let step = match pitch_class {
-        0 => 0,  // C
-        1 => 0,  // C#
-        2 => 1,  // D
-        3 => 1,  // D#
-        4 => 2,  // E
-        5 => 3,  // F
-        6 => 3,  // F#
-        7 => 4,  // G
-        8 => 4,  // G#
-        9 => 5,  // A
-        10 => 5, // A#
-        11 => 6, // B
-        _ => 0,
-    };
+    let step = STEPS[usize::from(pitch_class)];
     octave * 7 + step
 }
 
 fn needs_sharp(note: u8) -> bool {
     matches!(note % 12, 1 | 3 | 6 | 8 | 10)
+}
+
+/// Convert a small count or staff position to `f32` without a lossy cast.
+fn small_f32<T: TryInto<i16>>(n: T) -> f32 {
+    f32::from(n.try_into().unwrap_or(i16::MAX))
+}
+
+/// Draw ledger lines for a note at staff position `pos` centred on `x`.
+fn draw_ledger_lines(
+    painter: &egui::Painter,
+    x: f32,
+    pos: i32,
+    note_radius: f32,
+    color: egui::Color32,
+    y_for_pos: &impl Fn(i32) -> f32,
+) {
+    let mut ledger_positions = Vec::new();
+    // Middle C (pos 0) needs a ledger line
+    if pos == 0 {
+        ledger_positions.push(0);
+    }
+    // Ledger lines below bass staff (pos < -10)
+    let mut lp = -12;
+    while lp >= pos {
+        ledger_positions.push(lp);
+        lp -= 2;
+    }
+    // Ledger lines above treble staff (pos > 10)
+    lp = 12;
+    while lp <= pos {
+        ledger_positions.push(lp);
+        lp += 2;
+    }
+    for lp in ledger_positions {
+        let ly = y_for_pos(lp);
+        painter.line_segment(
+            [
+                egui::pos2(x - note_radius - 4.0, ly),
+                egui::pos2(x + note_radius + 4.0, ly),
+            ],
+            egui::Stroke::new(1.0_f32, color),
+        );
+    }
 }
 
 fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
@@ -101,7 +132,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     let half_step = line_spacing / 2.0;
 
     // Y position for a given staff position (higher position = higher on screen = lower y)
-    let y_for_pos = |pos: i32| -> f32 { middle_c_y - pos as f32 * half_step };
+    let y_for_pos = |pos: i32| -> f32 { middle_c_y - small_f32(pos) * half_step };
 
     // Draw treble clef lines (E4=2, G4=4, B4=6, D5=8, F5=10)
     let treble_lines = [2, 4, 6, 8, 10];
@@ -147,62 +178,22 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     );
 
     // Draw notes
-    let center_x = (staff_left + staff_right) / 2.0;
+    let center_x = f32::midpoint(staff_left, staff_right);
     let note_radius = half_step * 0.85;
     let mut sorted_notes: Vec<u8> = active_notes.iter().copied().collect();
-    sorted_notes.sort();
+    sorted_notes.sort_unstable();
 
     // Spread notes horizontally if multiple
     let spread = if sorted_notes.len() > 1 { 30.0 } else { 0.0 };
-    let total_spread = spread * (sorted_notes.len() as f32 - 1.0);
+    let total_spread = spread * (small_f32(sorted_notes.len()) - 1.0);
     let start_x = center_x - total_spread / 2.0;
 
     for (i, &note) in sorted_notes.iter().enumerate() {
         let pos = midi_to_staff_position(note);
         let y = y_for_pos(pos);
-        let x = start_x + i as f32 * spread;
+        let x = start_x + small_f32(i) * spread;
 
-        // Draw ledger lines if needed
-        // Middle C (pos 0) needs a ledger line
-        if pos == 0 {
-            painter.line_segment(
-                [
-                    egui::pos2(x - note_radius - 4.0, y),
-                    egui::pos2(x + note_radius + 4.0, y),
-                ],
-                egui::Stroke::new(1.0_f32, line_color),
-            );
-        }
-        // Ledger lines below bass staff (pos < -10)
-        {
-            let mut lp = -12;
-            while lp >= pos {
-                let ly = y_for_pos(lp);
-                painter.line_segment(
-                    [
-                        egui::pos2(x - note_radius - 4.0, ly),
-                        egui::pos2(x + note_radius + 4.0, ly),
-                    ],
-                    egui::Stroke::new(1.0_f32, line_color),
-                );
-                lp -= 2;
-            }
-        }
-        // Ledger lines above treble staff (pos > 10)
-        {
-            let mut lp = 12;
-            while lp <= pos {
-                let ly = y_for_pos(lp);
-                painter.line_segment(
-                    [
-                        egui::pos2(x - note_radius - 4.0, ly),
-                        egui::pos2(x + note_radius + 4.0, ly),
-                    ],
-                    egui::Stroke::new(1.0_f32, line_color),
-                );
-                lp += 2;
-            }
-        }
+        draw_ledger_lines(&painter, x, pos, note_radius, line_color, &y_for_pos);
 
         // Draw the note head (filled ellipse)
         painter.circle_filled(egui::pos2(x, y), note_radius, note_color);
@@ -226,7 +217,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         ui.allocate_painter(egui::vec2(available.x, available.y), egui::Sense::hover());
     let rect = response.rect;
 
-    let num_white = white_key_count(LOW_NOTE, HIGH_NOTE) as f32;
+    let num_white = small_f32(white_key_count(LOW_NOTE, HIGH_NOTE));
     let white_w = rect.width() / num_white;
     let white_h = rect.height();
     let black_w = white_w * 0.6;
@@ -244,7 +235,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         if is_black_key(note) {
             continue;
         }
-        let x = rect.left() + wi as f32 * white_w;
+        let x = rect.left() + small_f32(wi) * white_w;
         let key_rect =
             egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(white_w, white_h));
         let fill = if active_notes.contains(&note) {
@@ -279,7 +270,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             continue;
         }
         let left_white = black_key_left_white(note);
-        let x = rect.left() + left_white as f32 * white_w + white_w - black_w / 2.0;
+        let x = rect.left() + small_f32(left_white) * white_w + white_w - black_w / 2.0;
         let key_rect =
             egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(black_w, black_h));
         let fill = if active_notes.contains(&note) {
@@ -320,7 +311,7 @@ impl eframe::App for PianoApp {
             } else {
                 let names: Vec<&str> = {
                     let mut notes: Vec<u8> = active.iter().copied().collect();
-                    notes.sort();
+                    notes.sort_unstable();
                     notes.iter().map(|&n| midi_to_full_name(n)).collect()
                 };
                 if names.is_empty() {

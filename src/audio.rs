@@ -37,20 +37,20 @@ fn play_note(
     duration_ms: usize,
     state: &Arc<Mutex<NoteState>>,
 ) {
-    synth.note_on(0, note as u32, velocity).unwrap();
+    synth.note_on(0, u32::from(note), velocity).unwrap();
     state.lock().unwrap().active_notes.insert(note);
 
     let chunks = duration_ms / CHUNK_MS;
     render_chunks(synth, sink, chunks);
 
-    synth.note_off(0, note as u32).unwrap();
+    synth.note_off(0, u32::from(note)).unwrap();
     state.lock().unwrap().active_notes.remove(&note);
 
     // Short release tail
     render_chunks(synth, sink, 3);
 }
 
-pub fn play_sequence(state: Arc<Mutex<NoteState>>) {
+pub fn play_sequence(state: &Arc<Mutex<NoteState>>) {
     let settings = Settings::new().unwrap();
     let synth = Synth::new(settings).unwrap();
     synth.sfload(SOUNDFONT_PATH, true).unwrap();
@@ -62,7 +62,7 @@ pub fn play_sequence(state: Arc<Mutex<NoteState>>) {
     // C major scale
     let notes: &[u8] = &[60, 62, 64, 65, 67, 69, 71, 72];
     for &note in notes {
-        play_note(&synth, &sink, note, 100, 400, &state);
+        play_note(&synth, &sink, note, 100, 400, state);
     }
 
     // Pause between scale and chord
@@ -71,7 +71,7 @@ pub fn play_sequence(state: Arc<Mutex<NoteState>>) {
     // C major chord
     let chord: &[u8] = &[60, 64, 67];
     for &note in chord {
-        synth.note_on(0, note as u32, 100).unwrap();
+        synth.note_on(0, u32::from(note), 100).unwrap();
     }
     {
         let mut s = state.lock().unwrap();
@@ -83,7 +83,7 @@ pub fn play_sequence(state: Arc<Mutex<NoteState>>) {
     render_chunks(&synth, &sink, 2000 / CHUNK_MS);
 
     for &note in chord {
-        synth.note_off(0, note as u32).unwrap();
+        synth.note_off(0, u32::from(note)).unwrap();
     }
     {
         let mut s = state.lock().unwrap();
