@@ -14,12 +14,12 @@ pub struct PianoApp {
 }
 
 impl PianoApp {
-    pub fn new(note_state: Arc<Mutex<NoteState>>) -> Self {
+    pub const fn new(note_state: Arc<Mutex<NoteState>>) -> Self {
         Self { note_state }
     }
 }
 
-fn is_black_key(note: u8) -> bool {
+const fn is_black_key(note: u8) -> bool {
     matches!(note % 12, 1 | 3 | 6 | 8 | 10)
 }
 
@@ -51,7 +51,7 @@ fn midi_to_staff_position(note: u8) -> i32 {
     octave * 7 + step
 }
 
-fn needs_sharp(note: u8) -> bool {
+const fn needs_sharp(note: u8) -> bool {
     matches!(note % 12, 1 | 3 | 6 | 8 | 10)
 }
 
@@ -124,7 +124,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     // Let's use a grand staff. Middle C (position 0) sits between the two staves.
 
     // Center of the grand staff (where middle C ledger line goes)
-    let middle_c_y = rect.top() + staff_height * 0.5;
+    let middle_c_y = f32::mul_add(staff_height, 0.5, rect.top());
 
     // Treble staff: bottom line = E4 (pos 2), lines at pos 2,4,6,8,10
     // The bottom line of treble staff is 2 steps above middle C
@@ -132,7 +132,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     let half_step = line_spacing / 2.0;
 
     // Y position for a given staff position (higher position = higher on screen = lower y)
-    let y_for_pos = |pos: i32| -> f32 { middle_c_y - small_f32(pos) * half_step };
+    let y_for_pos = |pos: i32| -> f32 { small_f32(pos).mul_add(-half_step, middle_c_y) };
 
     // Draw treble clef lines (E4=2, G4=4, B4=6, D5=8, F5=10)
     let treble_lines = [2, 4, 6, 8, 10];
@@ -191,7 +191,7 @@ fn draw_staff(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     for (i, &note) in sorted_notes.iter().enumerate() {
         let pos = midi_to_staff_position(note);
         let y = y_for_pos(pos);
-        let x = start_x + small_f32(i) * spread;
+        let x = f32::mul_add(small_f32(i), spread, start_x);
 
         draw_ledger_lines(&painter, x, pos, note_radius, line_color, &y_for_pos);
 
@@ -235,7 +235,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
         if is_black_key(note) {
             continue;
         }
-        let x = rect.left() + small_f32(wi) * white_w;
+        let x = f32::mul_add(small_f32(wi), white_w, rect.left());
         let key_rect =
             egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(white_w, white_h));
         let fill = if active_notes.contains(&note) {
@@ -270,7 +270,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
             continue;
         }
         let left_white = black_key_left_white(note);
-        let x = rect.left() + small_f32(left_white) * white_w + white_w - black_w / 2.0;
+        let x = small_f32(left_white).mul_add(white_w, rect.left()) + white_w - black_w / 2.0;
         let key_rect =
             egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(black_w, black_h));
         let fill = if active_notes.contains(&note) {
@@ -282,7 +282,7 @@ fn draw_piano(ui: &mut egui::Ui, active_notes: &HashSet<u8>) {
     }
 }
 
-fn note_name(note: u8) -> &'static str {
+const fn note_name(note: u8) -> &'static str {
     match note % 12 {
         0 => "C",
         2 => "D",
@@ -334,7 +334,7 @@ impl eframe::App for PianoApp {
     }
 }
 
-fn midi_to_full_name(note: u8) -> &'static str {
+const fn midi_to_full_name(note: u8) -> &'static str {
     match note {
         48 => "C3",
         49 => "C#3",

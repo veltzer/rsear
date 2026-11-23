@@ -11,7 +11,7 @@ const SAMPLE_RATE: u32 = 44100;
 const CHANNELS: u16 = 2;
 const CHUNK_MS: usize = 20;
 
-fn chunk_samples() -> usize {
+const fn chunk_samples() -> usize {
     SAMPLE_RATE as usize * CHANNELS as usize * CHUNK_MS / 1000
 }
 
