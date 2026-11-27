@@ -11,7 +11,10 @@ fn main() -> eframe::Result<()> {
     std::thread::spawn(move || {
         // Small delay so the GUI window appears first
         std::thread::sleep(std::time::Duration::from_millis(500));
-        audio::play_sequence(&audio_state);
+        if let Err(err) = audio::play_sequence(&audio_state) {
+            eprintln!("rsear: audio failed: {err}");
+            state::lock(&audio_state).finished = true;
+        }
     });
 
     let options = eframe::NativeOptions {

@@ -1,3 +1,6 @@
+// Everything here is test code; clippy.toml lets test code unwrap.
+#![cfg(test)]
+
 use fluidlite::{Settings, Synth};
 use rodio::Source;
 use rodio::buffer::SamplesBuffer;

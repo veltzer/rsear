@@ -298,7 +298,7 @@ const fn note_name(note: u8) -> &'static str {
 impl eframe::App for PianoApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let (active, finished) = {
-            let s = self.note_state.lock().unwrap();
+            let s = crate::state::lock(&self.note_state);
             (s.active_notes.clone(), s.finished)
         };
 
