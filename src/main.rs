@@ -1,3 +1,5 @@
+//! rsear: Train your ears.
+
 mod audio;
 mod piano;
 mod state;
