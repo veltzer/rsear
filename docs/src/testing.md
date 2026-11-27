@@ -17,7 +17,7 @@ cargo nextest run
 The integration tests in `tests/basic.rs` cover the audio synthesis layer:
 
 | Test | What it verifies |
-|---|---|
+| --- | --- |
 | `test_synth_creation` | FluidSynth initializes and SoundFont loads |
 | `test_note_on_off` | MIDI note on/off commands work |
 | `test_note_produces_audio` | A played note generates non-zero audio samples |

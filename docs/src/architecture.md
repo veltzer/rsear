@@ -22,7 +22,7 @@ The threads communicate through `Arc<Mutex<NoteState>>`, which contains the set 
 ## Dependencies
 
 | Crate | Purpose |
-|---|---|
+| --- | --- |
 | `fluidlite` | MIDI synthesizer using SoundFont files |
 | `rodio` | Cross-platform audio output |
 | `eframe` | GUI framework (wraps egui) |
